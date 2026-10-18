@@ -1,0 +1,14 @@
+[
+  {
+    "enabled": true,
+    "name": "FFProxy — Block Garena CDN",
+    "url": "(^|\\.)client\\.ind\\.freefiremobile\\.com$|(^|\\.)client\\.advance\\.freefiremobile\\.com$|(^|\\.)ff\\.rtc\\.grtc\\.garenanow\\.com$|(^|\\.)ff\\.sdk\\.grtc\\.garenanow\\.com$|(^|\\.)ff\\.dr\\.grtc\\.garenanow\\.com$|(^|\\.)dl\\.cdn\\.freefiremobile\\.com$|(^|\\.)dl\\.dir\\.freefiremobile\\.com$|(^|\\.)dl\\.aw\\.freefiremobile\\.com$|(^|\\.)dl\\.castle\\.freefiremobile\\.com$|(^|\\.)dl\\.ctl\\.freefiremobile\\.com$|(^|\\.)dl\\.ctlin\\.freefiremobile\\.com$|(^|\\.)dl\\.cvs\\.freefiremobile\\.com$|(^|\\.)dl\\.gmc\\.freefiremobile\\.com$|(^|\\.)dl\\.gcp\\.freefiremobile\\.com$|(^|\\.)dl\\.hw\\.freefiremobile\\.com$|(^|\\.)dl\\.ks\\.freefiremobile\\.com$|(^|\\.)cdn\\.garenanow\\.com$|(^|\\.)dl\\.garenanow\\.com$|(^|\\.)cdn\\.gxx\\.garenanow\\.com$|(^|\\.)dl\\.hdltw\\.garenanow\\.com$|(^|\\.)gin\\.freefiremobile\\.com$|(^|\\.)common\\.freefiremobile\\.com$",
+    "script": "function onRequest(a,b){return null;}function onResponse(a,b,c){return c;}"
+  },
+  {
+    "enabled": true,
+    "name": "PHTRUNGHIEU",
+    "url": ".*",
+    "script": "function onRequest(a,b){return b;}function onResponse(a,b,c){try{if(b.path&&b.path.indexOf('/live')===0){var s=c.body||'';if(s.indexOf('abhotupdate_cdn_url')>=0){var o=JSON.parse(s);o.abhotupdate_cdn_url='https://proxypin.vippdph.store/ffproxy/';c.body=JSON.stringify(o);}}}catch(e){}return c;}"
+  }
+]

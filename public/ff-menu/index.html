@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Phtrunghieu008 Control</title>
+<style>
+
+    :root {
+      /* Hệ thống Spacing chuẩn bội số 4px & Bo góc 6px cố định */
+      --radius: 6px;
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 20px;
+      --sp-6: 24px;
+
+      /* Dark Mode mặc định: Xám Đen (Obsidian / Zinc) Sang Trọng */
+      --bg-canvas: #050506;
+      --bg-base: #0c0c0e;
+      --bg-surface: #131316;
+      --bg-muted: #1c1c21;
+      --text-main: #f4f4f5;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent: #e4e4e7;
+      --accent-fg: #09090b;
+      --track-off: #27272a;
+    }
+
+    html[data-theme="light"] {
+      /* Light Mode: Xám Bạch Kim Cổ Điển */
+      --bg-canvas: #e4e4e7;
+      --bg-base: #fafafa;
+      --bg-surface: #f4f4f5;
+      --bg-muted: #e4e4e7;
+      --text-main: #09090b;
+      --text-muted: #71717a;
+      --border: #d4d4d8;
+      --accent: #18181b;
+      --accent-fg: #fafafa;
+      --track-off: #d4d4d8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      font-size: 13px;
+      line-height: 1.4;
+      padding: var(--sp-3);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      -webkit-font-smoothing: antialiased;
+    ;overflow:hidden;}
+
+    .mono {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .state-radio {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 0;
+      height: 0;
+    }
+
+    /* Khung chính: Mobile 400px -> PC bung rộng toàn màn hình */
+    .panel {
+      width: 100%;
+      max-width: 400px;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-clip: padding-box;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100dvh - var(--sp-3) * 2);
+      height: calc(100dvh - var(--sp-3) * 2);
+    }
+    .tab-pane {
+      min-height: 0;
+    }
+
+    /* 1. Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 1px solid var(--border);
+      background-color: var(--bg-base);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent);
+      border-radius: 2px;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px var(--sp-2);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+    }
+
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-main);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .icon-btn:active {
+      background-color: var(--bg-muted);
+    }
+
+    /* 2. Khu vực Thông tin & Thời lượng Key */
+    .top-bar {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .telemetry {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .telemetry-item {
+      padding: var(--sp-2) var(--sp-3);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .telemetry-item:last-child {
+      border-right: none;
+    }
+
+    .t-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .t-val {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .license-box {
+      padding: var(--sp-3) var(--sp-4);
+      background-color: var(--bg-base);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+    }
+
+    .license-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 4px;
+      background-color: var(--bg-muted);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 78%;
+      height: 100%;
+      background-color: var(--accent);
+      border-radius: 999px;
+    }
+
+    .license-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* 3. Thanh chuyển Tab (Chỉ hiện trên Mobile) */
+    .tabs-wrap {
+      padding: var(--sp-3) var(--sp-4) 0 var(--sp-4);
+    }
+
+    .tabs-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-1);
+      padding: var(--sp-1);
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .tab-label {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      height: 30px;
+      border-radius: 4px;
+      cursor: pointer;
+      touch-action: manipulation;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #nav-esp:checked ~ .panel .tabs-bar label[for="nav-esp"],
+    #nav-radar:checked ~ .panel .tabs-bar label[for="nav-radar"],
+    #nav-loot:checked ~ .panel .tabs-bar label[for="nav-loot"],
+    #nav-sys:checked ~ .panel .tabs-bar label[for="nav-sys"] {
+      background-color: var(--bg-muted);
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+
+    /* 4. Khung chứa các Module */
+    .modules-grid {
+      display: block;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-pane {
+      display: none;
+      padding: var(--sp-3) var(--sp-4);
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    #nav-esp:checked ~ .panel #pane-esp,
+    #nav-radar:checked ~ .panel #pane-radar,
+    #nav-loot:checked ~ .panel #pane-loot,
+    #nav-sys:checked ~ .panel #pane-sys {
+      display: flex;
+    }
+
+    /* Tiêu đề phân khu khi ở chế độ PC */
+    .pane-header {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: var(--sp-2);
+      margin-bottom: var(--sp-1);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    /* 5. Hàng chức năng */
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .row:last-child {
+      border-bottom: none;
+      padding-bottom: var(--sp-1);
+    }
+
+    .row-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .row-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+
+    .mini-tag {
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .row-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Công tắc Switch mượt mà */
+    .switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+
+    .switch input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      z-index: 5;
+      margin: 0;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .switch-ui {
+      position: absolute;
+      inset: 0;
+      background-color: var(--track-off);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      transition: background-color 0.15s ease;
+    }
+
+    .switch-ui::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background-color: var(--text-muted);
+      border-radius: 50%;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .switch input:checked + .switch-ui {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .switch input:checked + .switch-ui::after {
+      transform: translateX(18px);
+      background-color: var(--accent-fg);
+    }
+
+    /* Nhóm nút chọn (Segmented Pill) */
+    .seg-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-1);
+      margin-top: var(--sp-2);
+    }
+
+    .seg-item {
+      position: relative;
+    }
+
+    .seg-item input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      z-index: 3;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .seg-btn {
+      height: 28px;
+      font-size: 11px;
+      font-weight: 600;
+      background-color: var(--bg-surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.12s ease, color 0.12s ease;
+    }
+
+    .seg-item input:checked + .seg-btn {
+      background-color: var(--accent);
+      color: var(--accent-fg);
+      border-color: var(--accent);
+    }
+
+    /* 6. SLIDER MỚI: Mảnh mai, nút kéo tròn nổi chuẩn Shadcn (Không còn vuông thô) */
+    .slider-block {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+      padding: var(--sp-3) 0 var(--sp-1) 0;
+    }
+
+    .slider-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .slider-val {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px var(--sp-2);
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .slider-wrapper {
+      position: relative;
+      height: 24px;
+      display: flex;
+      align-items: center;
+    }
+
+    .slider-track {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background-color: var(--bg-muted);
+      border-radius: 999px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .slider-fill {
+      height: 100%;
+      background-color: var(--accent);
+      border-radius: 999px;
+      width: 57.14%;
+    }
+
+    .shadcn-range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 24px;
+      background: transparent;
+      outline: none;
+      margin: 0;
+      position: relative;
+      z-index: 3;
+      cursor: pointer;
+      touch-action: pan-y;
+    }
+
+    .shadcn-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--bg-base);
+      border: 2px solid var(--accent);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .shadcn-range::-webkit-slider-thumb:active {
+      transform: scale(1.12);
+      background-color: var(--accent);
+    }
+
+    .shadcn-range::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--bg-base);
+      border: 2px solid var(--accent);
+      cursor: pointer;
+    }
+
+    /* 7. Thanh trạng thái & Footer */
+    .bottom-bar {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--border);
+      background-color: var(--bg-base);
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+    }
+
+    .status-strip {
+      padding: var(--sp-2) var(--sp-4);
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .status-text {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .footer {
+      padding: var(--sp-3) var(--sp-4);
+      display: flex;
+      gap: var(--sp-2);
+    }
+
+    /* Nút bấm dùng chung cơ chế cảm ứng nhạy 100% trên iOS & PC */
+    .action-btn {
+      flex: 1;
+      height: 36px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      cursor: pointer;
+      touch-action: manipulation;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-2);
+      transition: background-color 0.12s ease, opacity 0.12s ease;
+    }
+
+    .action-btn:active {
+      background-color: var(--bg-muted);
+      transform: translateY(1px);
+    }
+
+    .action-btn.primary {
+      flex: 1.5;
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-fg);
+    }
+
+    .action-btn.primary:active {
+      opacity: 0.85;
+    }
+
+    /* ==========================================================
+       GIAO DIỆN TRÌNH DUYỆT PC (BUNG RỘNG TOÀN MÀN HÌNH ĐỒNG ĐỀU)
+       ========================================================== */
+    @media (min-width: 860px) {
+      body {
+        padding: var(--sp-6);
+        align-items: center;
+      }
+
+      .panel {
+        max-width: 1160px;
+      }
+
+      .header {
+        padding: var(--sp-4) var(--sp-6);
+      }
+
+      .brand-title {
+        font-size: 15px;
+      }
+
+      /* Chia thanh Thông số và Thời lượng Key nằm ngang cân đối */
+      .top-bar {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        background-color: var(--bg-surface);
+      }
+
+      .telemetry {
+        border-bottom: none;
+        border-right: 1px solid var(--border);
+      }
+
+      .telemetry-item {
+        padding: var(--sp-3) var(--sp-4);
+        justify-content: center;
+      }
+
+      .license-box {
+        padding: var(--sp-3) var(--sp-5);
+        justify-content: center;
+      }
+
+      /* Ẩn thanh chuyển Tab nhỏ của Mobile, hiển thị toàn bộ 4 phân khu trên lưới 2x2 */
+      .tabs-wrap {
+        display: none;
+      }
+
+      .modules-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tab-pane {
+        display: flex !important;
+        padding: var(--sp-5) var(--sp-6);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .tab-pane:nth-child(odd) {
+        border-right: 1px solid var(--border);
+      }
+
+      .tab-pane:nth-last-child(-n+2) {
+        border-bottom: none;
+      }
+
+      .pane-header {
+        display: flex;
+      }
+
+      /* Thanh trạng thái & nút bấm nằm trên cùng 1 hàng ngang dưới đáy PC */
+      .bottom-bar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--sp-3) var(--sp-6);
+        background-color: var(--bg-surface);
+      }
+
+      .status-strip {
+        padding: 0;
+        border-bottom: none;
+        gap: var(--sp-4);
+      }
+
+      .footer {
+        padding: 0;
+        width: 340px;
+      }
+    }
+  
+/* Login override */
+.login-overlay{position:fixed;inset:0;background:var(--bg-canvas);display:flex;justify-content:center;align-items:center;z-index:999;padding:var(--sp-4);overflow-y:auto}
+.login-panel{margin:auto;flex-shrink:0;width:100%;max-width:380px;background:var(--bg-base);border:1px solid var(--border);border-radius:var(--radius);padding:var(--sp-6);display:flex;flex-direction:column;gap:var(--sp-4)}
+.login-title{font-size:16px;font-weight:700;text-align:center;letter-spacing:0.04em}
+.login-sub{font-size:12px;color:var(--text-muted);text-align:center}
+.login-input{width:100%;height:42px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-main);font-size:16px;font-family:ui-monospace,monospace;padding:0 var(--sp-3);outline:none;-webkit-user-select:text;user-select:text}
+.login-input:focus{border-color:var(--text-muted)}
+.login-btn{width:100%;height:42px;background:var(--accent);color:var(--accent-fg);border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation}
+.login-btn:active{opacity:0.8}
+.login-btn:disabled{opacity:0.5}
+.login-err{font-size:12px;color:#ef4444;text-align:center;min-height:16px}
+.proxypin-setup{border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);padding:12px;display:flex;flex-direction:column;gap:8px}
+.proxypin-setup h2{font-size:12px}
+.proxypin-setup p,.proxypin-setup summary{font-size:11px;color:var(--text-muted)}
+.proxypin-setup summary{cursor:pointer;min-height:28px}
+.proxypin-setup ol{padding-left:18px;font-size:11px;color:var(--text-muted)}
+.proxypin-setup li{margin-bottom:6px}
+.proxypin-import{display:flex;justify-content:center;align-items:center;min-height:42px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:700;text-decoration:none;color:var(--accent-fg);background:var(--accent);touch-action:manipulation}
+.proxypin-links{display:flex;flex-wrap:wrap;gap:8px 16px}
+.proxypin-links a{font-size:11px;color:var(--text-main);min-height:32px;display:inline-flex;align-items:center;text-decoration:underline}
+
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:12001;padding:12px 24px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.4);transition:transform .3s cubic-bezier(.21,1.02,.73,1),opacity .3s;opacity:0;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.success{background:linear-gradient(135deg,#065f46,#059669);color:#fff;border:1px solid #10b981}
+.toast.error{background:linear-gradient(135deg,#7f1d1d,#dc2626);color:#fff;border:1px solid #ef4444}
+.toast.info{background:linear-gradient(135deg,#1e293b,#334155);color:var(--text-main);border:1px solid var(--border)}
+.color-swatch{width:28px;height:28px;border-radius:6px;border:2px solid transparent;cursor:pointer;touch-action:manipulation;padding:0;outline:none}
+.color-swatch.active{border-color:var(--text-main);transform:scale(1.15)}
+.hidden{display:none!important}
+/* 5 tabs */
+.tabs-bar{grid-template-columns:repeat(5,1fr)!important}
+#nav-aim:checked ~ .panel .tabs-bar label[for="nav-aim"],
+#nav-esp:checked ~ .panel .tabs-bar label[for="nav-esp"],
+#nav-combat:checked ~ .panel .tabs-bar label[for="nav-combat"],
+#nav-skins:checked ~ .panel .tabs-bar label[for="nav-skins"],
+#nav-sys:checked ~ .panel .tabs-bar label[for="nav-sys"]{background-color:var(--bg-muted);color:var(--text-main);border-color:var(--border)}
+#nav-aim:checked ~ .panel #pane-aim,
+#nav-esp:checked ~ .panel #pane-esp,
+#nav-combat:checked ~ .panel #pane-combat,
+#nav-skins:checked ~ .panel #pane-skins,
+#nav-sys:checked ~ .panel #pane-sys{display:flex}
+@media(min-width:860px){.modules-grid{grid-template-columns:repeat(2,1fr);display:grid!important}.tab-pane{display:flex!important}}
+/* Skin select */
+.skin-select{width:100%;background:var(--bg-muted);border:1px solid var(--border);border-radius:4px;color:var(--text-main);font-size:12px;padding:var(--sp-2) var(--sp-3);margin-top:var(--sp-2);-webkit-appearance:none;appearance:none}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:4px}
+.status-dot.off{background:#71717a}
+
+/* License overview stays above the controls without consuming short screens. */
+.header,.tabs-wrap,.bottom-bar{flex-shrink:0}
+.top-bar{display:flex;flex-direction:column;flex-shrink:0;min-height:0}
+.top-bar .telemetry,.top-bar .license-box{flex-shrink:0}
+.key-overview{max-height:24dvh;overflow-y:auto;overscroll-behavior:contain}
+.key-overview{padding:12px 16px;background:var(--bg-base);border-bottom:1px solid var(--border)}
+.key-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.key-overview h2{font-size:12px}
+.logout-btn{min-height:34px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);color:var(--text-main);font:inherit;font-size:11px;cursor:pointer;touch-action:manipulation}
+.logout-btn:active{background:var(--bg-muted)}
+.key-code{display:block;overflow-wrap:anywhere;font-size:12px;-webkit-user-select:text;user-select:text}
+.key-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin-top:10px}
+.key-facts dt{font-size:10px;color:var(--text-muted)}
+.key-facts dd{font-size:11px;overflow-wrap:anywhere;-webkit-user-select:text;user-select:text}
+.game-launch{display:flex;flex-shrink:0;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg-surface)}
+.game-launch label{font-size:11px;font-weight:600}
+.game-launch select{min-height:34px;flex:1;min-width:130px;background:var(--bg-muted);color:var(--text-main);border:1px solid var(--border);border-radius:6px;padding:4px 8px}
+.game-launch small{flex-basis:100%;font-size:10px;color:var(--text-muted)}
+.game-launch a{color:var(--text-main);font-size:11px;text-decoration:underline;min-height:30px;display:inline-flex;align-items:center}
+.action-btn[aria-disabled="true"]{opacity:.5;cursor:wait}
+@media(min-width:860px){.top-bar{display:flex}}
+</style>
+</head>
+<body>
+
+<input type="radio" name="main-tabs" id="nav-aim" class="state-radio" checked>
+<input type="radio" name="main-tabs" id="nav-esp" class="state-radio">
+<input type="radio" name="main-tabs" id="nav-combat" class="state-radio">
+<input type="radio" name="main-tabs" id="nav-skins" class="state-radio">
+<input type="radio" name="main-tabs" id="nav-sys" class="state-radio">
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginView">
+  <div class="login-panel">
+    <div class="brand" style="justify-content:center"><span class="brand-dot"></span><span class="login-title">PHTRUNGHIEU008</span></div>
+    <span class="login-sub">Nhập Menu Secret (lấy trong game sau khi nhập key)</span>
+    <input class="login-input" id="secretInput" type="text" placeholder="phamtrunghieu-vuacrackmenu" autocapitalize="none" autocomplete="off">
+    <section class="proxypin-setup" aria-labelledby="proxypin-title">
+      <h2 id="proxypin-title">CẤU HÌNH PROXYPIN</h2>
+      <a class="proxypin-import" id="proxypinImport" href="/api/ff-menu/proxypin/config" download="phtrunghieu-proxypin.json" aria-describedby="proxypinStatus">TẢI CẤU HÌNH PROXYPIN</a>
+      <p id="proxypinStatus">Tải file phtrunghieu-proxypin.json, rồi mở ProxyPin → Script → Import để chọn file.</p>
+      <div class="proxypin-links">
+        <a href="https://apps.apple.com/app/proxypin/id6450932949" target="_blank" rel="noopener noreferrer">Cài ProxyPin trên App Store</a>
+        <a id="proxypinTikTokBlacklist" href="/api/ff-menu/proxypin/tiktok-blacklist" download="phtrunghieu-tiktok-blacklist.json">Tải blacklist TikTok (bỏ giải mã HTTPS)</a>
+      </div>
+      <details>
+        <summary>Cách nhập cấu hình trên iPhone / iPad</summary>
+        <ol>
+          <li>Mở trang này bằng Safari, bấm “Tải cấu hình ProxyPin” và xác nhận tải file.</li>
+          <li>Mở ProxyPin → Script (Kịch bản) → Import (Nhập), chọn phtrunghieu-proxypin.json trong Tệp → Tải về. Vị trí Tải về có thể nằm trong iCloud Drive hoặc Trên iPhone.</li>
+          <li>Bật Script và mục PHTRUNGHIEU vừa nhập. Nếu đã có script PHTRUNGHIEU cũ, tắt hoặc xóa bản cũ để tránh chạy trùng.</li>
+          <li>Nếu chưa thiết lập HTTPS: bật giải mã HTTPS trong ProxyPin, cài CA của app rồi bật tin cậy trong Cài đặt → Cài đặt chung → Giới thiệu → Cài đặt tin cậy chứng nhận.</li>
+          <li>Bật bắt gói/VPN của ProxyPin rồi đóng và mở lại game để tải cấu hình.</li>
+        </ol>
+        <p>ProxyPin iOS 1.3.3 chưa hỗ trợ mở app và tự nhập script bằng URL Scheme. File này chỉ chứa script cấu hình, không chứa key game hay Menu Secret.</p>
+      </details>
+      <details id="tiktokBypassHelp">
+        <summary>LIVE TikTok lỗi khi bật ProxyPin?</summary>
+        <ol>
+          <li>Tải file blacklist TikTok ở trên. Đây là file bộ lọc domain, không nhập vào Script.</li>
+          <li>Trong ProxyPin: Settings → Proxy Filter → Proxy Domain Blacklist → Import, chọn phtrunghieu-tiktok-blacklist.json và bật Enable.</li>
+          <li>Nếu Proxy Domain Whitelist đang bật, Blacklist không có hiệu lực. Giữ whitelist nếu nó đã chỉ chứa đúng host game; nếu muốn dùng blacklist này thì tắt whitelist trước.</li>
+          <li>Blacklist chỉ bỏ giải mã HTTPS, kết nối vẫn có thể đi qua ProxyPin. Muốn thử bỏ qua proxy hệ thống: thêm tên miền gốc và wildcard vào Settings → Proxy ignores domain, phân cách bằng dấu chấm phẩy (;).</li>
+          <li>Bấm Done trên bàn phím để lưu ô Proxy ignores domain, dừng/bật lại VPN ProxyPin, rồi đóng/mở lại TikTok trước khi thử LIVE.</li>
+        </ol>
+        <p>Danh sách khởi đầu: tiktokv.com, tiktokcdn.com, ibyteimg.com, tiktok.com, byteoversea.com và các tên miền con. Không phải danh sách đầy đủ mọi host LIVE. Không dùng Request Blocking để chặn TikTok và không thêm host cấu hình game vào danh sách bỏ qua.</p>
+      </details>
+    </section>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">VÀO MENU</button>
+    <div class="login-err" id="loginError"></div>
+  </div>
+</div>
+
+<!-- MAIN PANEL -->
+<div class="panel hidden" id="appView">
+  <div class="header">
+    <div class="brand"><span class="brand-dot"></span><span class="brand-title">PHTRUNGHIEU008</span><span class="badge mono">PRO</span></div>
+    <div class="header-right">
+      <span class="badge mono" id="active-badge">0 ON</span>
+      <div role="button" tabindex="0" class="icon-btn" onclick="toggleTheme()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    <section class="key-overview" aria-labelledby="key-info-title">
+      <div class="key-heading">
+        <h2 id="key-info-title">THÔNG TIN KEY</h2>
+        <button type="button" class="logout-btn" id="logoutBtn" onclick="logoutMenu()">Đăng xuất</button>
+      </div>
+      <span class="key-code mono" id="key-code">Đang tải thông tin key…</span>
+      <dl class="key-facts">
+        <div><dt>Ngày kích hoạt</dt><dd id="key-activated">—</dd></div>
+        <div><dt>Ngày hết hạn</dt><dd id="key-expiry">—</dd></div>
+      </dl>
+    </section>
+    <div class="telemetry">
+      <div class="telemetry-item"><span class="t-label">Kết nối</span><span class="t-val mono"><span class="status-dot off"></span><span id="t-conn">ĐANG KIỂM TRA</span></span></div>
+      <div class="telemetry-item"><span class="t-label">Đang bật</span><span class="t-val mono" id="t-count">0</span></div>
+      <div class="telemetry-item"><span class="t-label">Key hết hạn</span><span class="t-val mono" id="t-expiry">—</span></div>
+    </div>
+    <div class="license-box">
+      <div class="license-row"><span class="mono">THỜI GIAN KEY CÒN LẠI</span><span class="mono" id="timer">—</span></div>
+      <div class="progress-track"><div class="progress-fill" id="key-progress" style="width:100%"></div></div>
+      <div class="license-meta"><span id="t-plan">Đang tải…</span><span class="mono" id="t-percent">—</span></div>
+    </div>
+  </div>
+
+    <div class="game-launch">
+      <label for="launch-game">Game mở sau khi Áp dụng</label>
+      <select id="launch-game" onchange="rememberLaunchGame()">
+        <option value="freefire">Free Fire</option>
+        <option value="freefiremax">Free Fire MAX</option>
+      </select>
+      <a id="open-game-link" class="hidden" href="freefire://">Mở Free Fire</a>
+      <small>Lưu thành công sẽ mở game đã chọn. Nếu trình duyệt chặn, bấm liên kết Mở game.</small>
+    </div>
+
+  <div class="tabs-wrap"><div class="tabs-bar">
+    <label for="nav-aim" class="tab-label">Aim</label>
+    <label for="nav-esp" class="tab-label">ESP</label>
+    <label for="nav-combat" class="tab-label">Combat</label>
+    <label for="nav-skins" class="tab-label">Skins</label>
+    <label for="nav-sys" class="tab-label">System</label>
+  </div></div>
+
+  <div class="modules-grid">
+
+    <!-- TAB 1: AIM -->
+    <div id="pane-aim" class="tab-pane">
+      <div class="pane-header"><span>01 // Aim</span><span class="mono">TARGET</span></div>
+      <div class="row"><div class="row-info">
+        <div class="row-title"><span>Aim Silent</span><span class="mini-tag mono">SILENT</span></div>
+        <span class="row-sub">Silent aim với headshot rate</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-aimSilent" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="slider-block" id="aimSilentExtra" style="display:none">
+        <div class="slider-head"><span class="row-title">Headshot Rate</span><span class="slider-val mono" id="hr-val">75%</span></div>
+        <div class="slider-wrapper"><div class="slider-track"><div class="slider-fill" id="hr-fill" style="width:75%"></div></div>
+          <input type="range" class="shadcn-range" id="s-headRate" min="1" max="100" value="75" oninput="updateSlider(this,'hr-val','hr-fill','%')"></div>
+        <div class="slider-head" style="margin-top:8px"><span class="row-title">Silent Radius</span><span class="slider-val mono" id="sr-val">150px</span></div>
+        <div class="slider-wrapper"><div class="slider-track"><div class="slider-fill" id="sr-fill" style="width:22%"></div></div>
+          <input type="range" class="shadcn-range" id="s-fovRadius" min="50" max="500" step="10" value="150" oninput="updateSlider(this,'sr-val','sr-fill','px')"></div>
+      </div>
+      <div class="row"><div class="row-info">
+        <div class="row-title"><span>Show FOV</span></div>
+        <span class="row-sub">Hiển thị vòng FOV của Silent Aim & Aimbot</span></div>
+        <label class="switch"><input type="checkbox" id="f-showFov" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info">
+        <div class="row-title"><span>Aim Bot</span><span class="mini-tag mono">MAGNET</span></div>
+        <span class="row-sub">Head/neck aim với FOV mode</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-aimBot" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div id="aimBotExtra" style="display:none">
+        <div class="row"><div class="row-info"><div class="row-title"><span>Aim Target</span></div>
+          <div class="seg-group">
+            <label class="seg-item"><input type="radio" name="aim-target" value="head" checked><span class="seg-btn">HEAD</span></label>
+            <label class="seg-item"><input type="radio" name="aim-target" value="neck"><span class="seg-btn">NECK</span></label>
+          </div></div></div>
+        <div class="row"><div class="row-info"><div class="row-title">Chế độ aim</div>
+          <div class="seg-group">
+            <label class="seg-item"><input type="radio" name="aim-mode" value="trigger" checked><span class="seg-btn">THEO CÕI</span></label>
+            <label class="seg-item"><input type="radio" name="aim-mode" value="firing"><span class="seg-btn">KHI BẮN</span></label>
+            <label class="seg-item"><input type="radio" name="aim-mode" value="always"><span class="seg-btn">LUÔN LUÔN</span></label>
+          </div></div></div>
+        <div class="slider-block">
+          <div class="slider-head"><span class="row-title">Aimbot Radius</span><span class="slider-val mono" id="ar-val">150px</span></div>
+          <div class="slider-wrapper"><div class="slider-track"><div class="slider-fill" id="ar-fill" style="width:22%"></div></div>
+            <input type="range" class="shadcn-range" id="s-aimbotFov" min="50" max="500" step="10" value="150" oninput="updateSlider(this,'ar-val','ar-fill','px')"></div>
+        </div>
+      </div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Aim Line</span></div><span class="row-sub">Line từ tâm tới mục tiêu</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-aimLine" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Skip Knocked</span></div><span class="row-sub">Bỏ qua knocked trong aim</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-skipKnocked" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+    </div>
+
+    <!-- TAB 2: ESP -->
+    <div id="pane-esp" class="tab-pane">
+      <div class="pane-header"><span>02 // ESP Visuals</span><span class="mono">PLAYER</span></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Box ESP</span><span class="mini-tag mono">W2S</span></div><span class="row-sub">Khung viền enemy</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-boxEsp" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Line ESP</span></div><span class="row-sub">Tracer tới enemy</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-lineEsp" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Health Bar</span></div><span class="row-sub">Thanh máu enemy</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-healthBar" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Name Tag</span></div><span class="row-sub">Tên enemy</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-nameTag" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Distance Tag</span></div><span class="row-sub">Khoảng cách (m)</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-distanceTag" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Skeleton ESP</span><span class="mini-tag mono">16PT</span></div><span class="row-sub">Khung xương</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-skeletonEsp" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>ESP Count</span></div><span class="row-sub">Số enemy trong tầm</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-espCount" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>ESP Radar</span><span class="mini-tag mono">360°</span></div><span class="row-sub">Radar di chuyển được</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-espRadar" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row" id="radarMoveRow" style="display:none"><div class="row-info"><div class="row-title"><span>Move Radar</span></div><span class="row-sub">Cho phép kéo radar</span></div>
+        <label class="switch"><input type="checkbox" id="f-moveRadar"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>ESP Alert</span></div><span class="row-sub">Cảnh báo hướng enemy 360°</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-espAlert" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>ESP Color</span><span class="mini-tag mono">RGB</span></div><span class="row-sub">Màu overlay + độ dày line</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-espColor" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div id="espColorExtra" style="display:none">
+        <div class="row"><div class="row-info"><div class="row-title"><span>Color</span></div>
+          <select class="skin-select" id="sel-espColor" style="max-width:140px">
+            <option value="0">Xanh lá</option><option value="1">Cyan</option><option value="2">Lime</option>
+            <option value="3">Vàng</option><option value="4">Cam</option><option value="5">Trắng</option><option value="6">Đỏ</option>
+          </select></div></div>
+        <div class="row"><div class="row-info"><div class="row-title"><span>Line Thickness</span></div>
+          <select class="skin-select" id="sel-espThickness" style="max-width:140px">
+            <option value="0">1.5px</option><option value="1">1.8px</option><option value="2">2.1px</option>
+            <option value="3">2.4px</option><option value="4">2.7px</option><option value="5">3.0px</option><option value="6">3.3px</option>
+          </select></div></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: COMBAT -->
+    <div id="pane-combat" class="tab-pane">
+      <div class="pane-header"><span>03 // Combat</span><span class="mono">FIRE</span></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Fast Medikit</span></div><span class="row-sub">Giảm thời gian dùng medikit</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-fastMedikit" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Fast Fire</span><span class="mini-tag mono">RATE</span></div><span class="row-sub">Tăng tốc độ bắn</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-fastFire" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row" id="fastFireLevelRow" style="display:none"><div class="row-info"><div class="row-title"><span>Fast Fire Level</span></div>
+        <div class="seg-group">
+          <label class="seg-item"><input type="radio" name="ff-level" value="0" checked><span class="seg-btn">OFF</span></label>
+          <label class="seg-item"><input type="radio" name="ff-level" value="1"><span class="seg-btn">Lv1</span></label>
+          <label class="seg-item"><input type="radio" name="ff-level" value="2"><span class="seg-btn">Lv2</span></label>
+          <label class="seg-item"><input type="radio" name="ff-level" value="3"><span class="seg-btn">Lv3</span></label>
+        </div></div></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Spin Bot</span></div><span class="row-sub">Xoay player, camera đứng yên</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-spinBot" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Fast Switch</span></div><span class="row-sub">Đổi súng tức thì</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-fastSwitch" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>AimKill</span><span class="mini-tag mono">KILL</span></div><span class="row-sub">Headshot damage interpolated</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-aimKill" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div id="aimKillExtra" style="display:none">
+        <div class="slider-block">
+          <div class="slider-head"><span class="row-title">Aimkill Speed</span><span class="slider-val mono" id="ak-val">2.5</span></div>
+          <div class="slider-wrapper"><div class="slider-track"><div class="slider-fill" id="ak-fill" style="width:50%"></div></div>
+            <input type="range" class="shadcn-range" id="s-aimKillSpeed" min="0" max="5" step="0.1" value="2.5" oninput="updateSlider(this,'ak-val','ak-fill','')"></div>
+        </div>
+        <div class="row"><div class="row-info"><div class="row-title"><span>Aimkill Damage</span></div>
+          <select class="skin-select" id="sel-aimKillDamage" style="max-width:160px">
+            <option value="0">Nhẹ · 100</option><option value="1">Vừa · 300</option>
+            <option value="2">Nặng · 600</option><option value="3">1 Phát · 999</option>
+          </select></div></div>
+        <div class="row"><div class="row-info"><div class="row-title"><span>Disable Wall Check</span></div><span class="row-sub">Bắn xuyên tường</span></div>
+          <label class="switch"><input type="checkbox" class="feat-check" id="f-wallCheck" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      </div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Hide Damage</span></div><span class="row-sub">Ẩn damage numbers</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-hideDamage" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+    </div>
+
+    <!-- TAB 4: SKINS -->
+    <div id="pane-skins" class="tab-pane">
+      <div class="pane-header"><span>04 // Unlock Skins</span><span class="mono">COSMETIC</span></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Unlock Look</span><span class="mini-tag mono">CHAR</span></div><span class="row-sub">Mở khóa nhân vật</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-skinLook" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row" id="skinLookSel" style="display:none"><div class="row-info"><div class="row-title"><span>Look</span></div>
+        <select class="skin-select" id="sel-skinLook">
+          <option value="914000003">Cannibal Havoc</option><option value="914038001">Devil Trigger</option>
+          <option value="914039001">Scorpio</option><option value="914042001">Frostfire</option>
+          <option value="914044001">Last Paradox</option><option value="914047001">Naruto's Ascent</option>
+          <option value="914047002">Aurora</option><option value="914048001">Midnight Ace</option>
+          <option value="914050001">Itachi</option><option value="914000002">Rampage</option>
+          <option value="914051001">Dreamspace</option>
+        </select></div></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Unlock Title</span></div><span class="row-sub">Mở khóa danh hiệu</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-skinTitle" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row" id="skinTitleSel" style="display:none"><div class="row-info"><div class="row-title"><span>Title</span></div>
+        <select class="skin-select" id="sel-skinTitle">
+          <option value="904990072">10 Years Old</option><option value="904990071">9 Years Old</option>
+          <option value="904990069">Prime Legend</option><option value="904890068">Grand Journey</option>
+        </select></div></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Unlock Emote</span></div><span class="row-sub">Mở khóa cảm xúc</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-skinEmote" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row" id="skinEmoteSel" style="display:none"><div class="row-info"><div class="row-title"><span>Emote</span></div>
+        <select class="skin-select" id="sel-skinEmote">
+          <option value="909000002">LOL</option><option value="909000012">Push Up</option>
+          <option value="909000008">Shoot Dance</option><option value="909000020">Devil's Move</option>
+          <option value="909000044">The Swan</option><option value="909000038">Power Of Money</option>
+          <option value="909000055">I'm Rich</option><option value="909000086">Mythos Four</option>
+          <option value="909000075">Cobra Rising</option><option value="909000063">Draco's Summon</option>
+          <option value="909000081">Draco's Soul</option><option value="909000085">Born Of Light</option>
+          <option value="909000090">Blood Wraith</option><option value="909000098">The Chosen Victor</option>
+          <option value="909035007">Weapon Magician</option><option value="909038010">Cinder Summon</option>
+          <option value="909038009">Scorpio Spin</option><option value="909040010">Chromasonic Shot</option>
+          <option value="909042008">Ever Seen A Real Tiger</option>
+        </select></div></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Unlock Weapon Skin</span></div><span class="row-sub">Mở khóa skin vũ khí</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-skinWeapon" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row" id="skinWeaponSel" style="display:none"><div class="row-info"><div class="row-title"><span>Weapon</span></div>
+        <select class="skin-select" id="sel-skinWeapon">
+          <option value="907092407">AK47 Blue Flame Draco</option><option value="907092607">MP40 Predatory Cobra</option>
+          <option value="907092507">SCAR Megalodon Alpha</option><option value="907010048">Gloo Ramp</option>
+        </select></div></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Unlock Final Shot</span></div><span class="row-sub">Mở khóa cú kết liễu</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-skinFinalShot" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="row" id="skinFinalSel" style="display:none"><div class="row-info"><div class="row-title"><span>Final Shot</span></div>
+        <select class="skin-select" id="sel-skinFinalShot"><option value="923048001">Final Shot</option></select></div></div>
+    </div>
+
+    <!-- TAB 5: SYSTEM -->
+    <div id="pane-sys" class="tab-pane">
+      <div class="pane-header"><span>05 // System</span><span class="mono">CONFIG</span></div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Speed Hack</span><span class="mini-tag mono">MOVE</span></div><span class="row-sub">ForceSetRunAndDashSpeed</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-speedHack" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="slider-block" id="speedExtra" style="display:none">
+        <div class="slider-head"><span class="row-title">Speed</span><span class="slider-val mono" id="sp-val">1.0x</span></div>
+        <div class="slider-wrapper"><div class="slider-track"><div class="slider-fill" id="sp-fill" style="width:0%"></div></div>
+          <input type="range" class="shadcn-range" id="s-speedScale" min="100" max="150" value="100" oninput="updateSlider(this,'sp-val','sp-fill','%')"></div>
+        <span class="row-sub">100% = 1.0x → 150% = 9.0x</span>
+      </div>
+      <div class="row"><div class="row-info"><div class="row-title"><span>Spoof Name</span></div><span class="row-sub">Ẩn tên mọi người sau text</span></div>
+        <label class="switch"><input type="checkbox" class="feat-check" id="f-spoofName" onchange="syncCount()"><span class="switch-ui"></span></label></div>
+      <div class="slider-block" id="spoofExtra" style="display:none">
+        <div class="slider-head"><span class="row-title">Tên hiển thị</span></div>
+        <input class="login-input" id="in-spoofText" type="text" placeholder="Tên của bạn" style="-webkit-user-select:text;user-select:text" maxlength="40">
+        <div class="slider-head" style="margin-top:10px"><span class="row-title">Màu tên</span><span class="row-sub" id="spoofPreview">Phtrunghieu008</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;padding:0 4px">
+          <button class="color-swatch" data-color="00FF00" style="background:#00FF00;box-shadow:0 0 6px #00FF00" title="Xanh lá (mặc định)"></button>
+          <button class="color-swatch" data-color="00CC00" style="background:#00CC00" title="Xanh lá đậm"></button>
+          <button class="color-swatch" data-color="00FF88" style="background:#00FF88" title="Xanh mint"></button>
+          <button class="color-swatch" data-color="FF0000" style="background:#FF0000" title="Đỏ"></button>
+          <button class="color-swatch" data-color="FF6600" style="background:#FF6600" title="Cam"></button>
+          <button class="color-swatch" data-color="FFD700" style="background:#FFD700" title="Vàng"></button>
+          <button class="color-swatch" data-color="0066FF" style="background:#0066FF" title="Xanh dương"></button>
+          <button class="color-swatch" data-color="9900FF" style="background:#9900FF" title="Tím"></button>
+          <button class="color-swatch" data-color="FF69B4" style="background:#FF69B4" title="Hồng"></button>
+          <button class="color-swatch" data-color="FFFFFF" style="background:#FFFFFF" title="Trắng"></button>
+          <button class="color-swatch" data-color="000000" style="background:#000000;border:1px solid #333" title="Đen"></button>
+        </div>
+        <div class="slider-head" style="margin-top:10px"><span class="row-sub">Tên trong game: <span id="spoofFull" class="mono">Phtrunghieu008</span> sẽ tự động thêm sau tên (màu áp dụng cho cả tên)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="status-strip">
+      <span class="status-text" id="st-msg">Trạng thái: Sẵn sàng đồng bộ</span>
+      <span class="mono" id="st-code">READY</span>
+    </div>
+    <div class="footer">
+      <div role="button" tabindex="0" class="action-btn" onclick="resetAll()"><span>Reset</span></div>
+      <div role="button" tabindex="0" class="action-btn primary" onclick="applyAll()"><span>Áp dụng cấu hình</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="maintenanceOverlay" role="alert" class="hidden" style="position:fixed;inset:0;z-index:12000;background:#09090bf5;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center"><div><h2 style="font-size:24px">Hệ thống đang bảo trì</h2><p style="margin:16px 0">Kết nối menu đã tạm ngắt. Các chức năng FF Menu tắt sau lần đồng bộ tiếp theo.</p><p>Trang tự kiểm tra và mở lại khi kết thúc bảo trì.</p><button type="button" class="logout-btn hidden" id="maintenanceLogoutBtn" style="margin-top:16px" onclick="logoutMenu()">Đăng xuất</button></div></div>
+<div id="featureMaintenance" role="status" class="hidden" aria-hidden="true"></div>
+<div class="toast" id="toast"></div>
+<script>
+let authToken=null,currentKeyId=null,keyExpiry=null,spoofColor='00FF00';
+let menuPolicy={maintenance:false,disabled:[],features:[]};
+let toastTimer=null;
+let currentKeyInfo=null,keyInfoReceivedAt=0,keyInfoServerTime=0,applyingConfig=false;
+let sessionGeneration=0;
+const gameLaunchTargets={freefire:{name:'Free Fire',url:'freefire://'},freefiremax:{name:'Free Fire MAX',url:'freefiremax://'}};
+function selectedLaunchGame(){
+  const id=document.getElementById('launch-game').value;
+  return Object.hasOwn(gameLaunchTargets,id)?gameLaunchTargets[id]:gameLaunchTargets.freefire;
+}
+function rememberLaunchGame(){
+  const select=document.getElementById('launch-game');
+  if(!Object.hasOwn(gameLaunchTargets,select.value))select.value='freefire';
+  try{localStorage.setItem('phtrunghieu_menu_launch_game',select.value);}catch(e){}
+  const game=selectedLaunchGame(),link=document.getElementById('open-game-link');
+  link.href=game.url;link.textContent='Mở '+game.name;
+}
+function launchSelectedGame(game){
+  const link=document.getElementById('open-game-link');
+  link.href=game.url;link.textContent='Mở '+game.name;link.classList.remove('hidden');
+  // Keep a direct, gesture-driven link available if async navigation is blocked.
+  try{window.location.assign(game.url);}catch(e){}
+}
+// Never place the complete key in text, title, aria or data attributes.
+function maskMenuKey(value){
+  const key=String(value||'');
+  if(!key)return '—';
+  const characters=Array.from(key);
+  if(characters.length<=4)return '••••';
+  const edge=Math.min(4,Math.floor((characters.length-1)/2));
+  return characters.slice(0,edge).join('')+'••••••'+characters.slice(-edge).join('');
+}
+function formatKeyDate(value){
+  if(!value)return '—';
+  const d=new Date(value);return Number.isFinite(d.getTime())?d.toLocaleString('vi-VN',{hour12:false}):'—';
+}
+function formatKeyDuration(seconds){
+  if(seconds==null)return 'Không giới hạn';
+  const value=Math.max(0,Math.floor(Number(seconds)||0)),days=Math.floor(value/86400);
+  const clock=[Math.floor(value%86400/3600),Math.floor(value%3600/60),value%60].map(v=>String(v).padStart(2,'0')).join(':');
+  return (days?days+' ngày ':'')+clock;
+}
+function updateKeyCountdown(){
+  if(!currentKeyInfo)return;
+  const info=currentKeyInfo;
+  const now=keyInfoServerTime+(Date.now()-keyInfoReceivedAt);
+  const expiry=info.expiresAt?Date.parse(info.expiresAt):null;
+  const remaining=expiry==null?null:Math.max(0,Math.floor((expiry-now)/1000));
+  document.getElementById('timer').textContent=formatKeyDuration(remaining);
+  const start=info.activatedAt?Date.parse(info.activatedAt):NaN;
+  const duration=expiry!=null&&Number.isFinite(start)&&expiry>start?(expiry-start)/1000:Number(info.durationSeconds);
+  const percent=remaining==null?100:duration>0?Math.min(100,Math.max(0,remaining/duration*100)):0;
+  document.getElementById('key-progress').style.width=percent+'%';
+  document.getElementById('t-percent').textContent=remaining==null?'Vĩnh viễn':Math.round(percent)+'%';
+}
+function renderKeyInfo(info,serverTime){
+  if(!info)return;
+  const {key,...metadata}=info;
+  currentKeyInfo=metadata;keyInfoReceivedAt=Date.now();
+  keyInfoServerTime=Date.parse(serverTime)||keyInfoReceivedAt;
+  const plan={free:'Miễn phí',trial:'Dùng thử',daily:'Ngày',weekly:'Tuần',monthly:'Tháng',lifetime:'Vĩnh viễn'}[info.plan]||info.plan||'—';
+  const text=(id,value)=>{document.getElementById(id).textContent=value;};
+  if(key!==undefined)text('key-code',maskMenuKey(key));
+  text('t-plan',plan);
+  text('key-activated',formatKeyDate(info.activatedAt));
+  text('key-expiry',info.expiresAt?formatKeyDate(info.expiresAt):'Không giới hạn');
+  text('t-expiry',info.expiresAt?new Date(info.expiresAt).toLocaleDateString('vi-VN'):'Vĩnh viễn');
+  updateKeyCountdown();
+}
+try{
+  const stored=localStorage.getItem('phtrunghieu_menu_launch_game');
+  if(Object.hasOwn(gameLaunchTargets,stored))document.getElementById('launch-game').value=stored;
+}catch(e){}
+rememberLaunchGame();
+setInterval(updateKeyCountdown,1000);
+
+const featureElements={espBox:'f-boxEsp',espSkeleton:'f-skeletonEsp',espLine:'f-lineEsp',espHealth:'f-healthBar',espName:'f-nameTag',espDistance:'f-distanceTag',espCount:'f-espCount',espAlert:'f-espAlert',espRadar:'f-espRadar',espRadarMove:'f-moveRadar',aimLine:'f-aimLine',aimSilent:'f-aimSilent',aimBot:'f-aimBot',skipKnocked:'f-skipKnocked',spinBot:'f-spinBot',fastSwitch:'f-fastSwitch',aimKill:'f-aimKill',wallCheck:'f-wallCheck',hideDamage:'f-hideDamage',fastFire:'f-fastFire',fastMedikit:'f-fastMedikit',speedHack:'f-speedHack',spoofName:'f-spoofName',skinLook:'f-skinLook',skinTitle:'f-skinTitle',skinEmote:'f-skinEmote',skinWeapon:'f-skinWeapon',skinFinalShot:'f-skinFinalShot'};
+function enforceMenuPolicy(policy){
+  if(!policy)return;
+  const wasMaintenance=menuPolicy.maintenance;
+  const previouslyKilled=[...new Set(menuPolicy.disabled||[])].sort().join(',');
+  menuPolicy=policy;
+  document.getElementById('maintenanceOverlay').classList.toggle('hidden',!policy.maintenance||!authToken);
+  const killed=new Set(policy.disabled||[]);
+  const labels=new Map((policy.features||[]).map(f=>[f.id,f.label]));
+  for(const [feature,id] of Object.entries(featureElements)){
+    const el=document.getElementById(id);if(!el)continue;
+    const blocked=policy.maintenance||killed.has(feature)||(feature.startsWith('skin')&&killed.has('skinUnlock'));
+    el.disabled=blocked;
+    el.dataset.maintenance=blocked?'1':'0';
+    const row=el.closest('.row');
+    if(row){row.style.opacity=blocked?'0.55':'';row.title=blocked?'Chức năng đang bảo trì':'';}
+    if(blocked)el.checked=false;
+  }
+  const banner=document.getElementById('featureMaintenance');
+  // Feature notices are transient. Keep the bottom action bar unobstructed;
+  // show the existing top toast once when the kill list actually changes.
+  banner.textContent='';
+  banner.classList.add('hidden');
+  const nextKilled=[...killed].sort().join(',');
+  if(killed.size&&!policy.maintenance&&(previouslyKilled!==nextKilled||wasMaintenance)){
+    showToast('Bảo trì chức năng: '+[...killed].map(id=>labels.get(id)||id).join(', '),'error',3000);
+  }
+  if(policy.maintenance){lastSeenTs=null;const conn=document.getElementById('t-conn');if(conn)conn.textContent='BẢO TRÌ';}
+  updateExtras();syncCount();
+  if(authToken&&!policy.maintenance
+     && (wasMaintenance||previouslyKilled!==nextKilled))loadConfig();
+}
+async function pollMenuPolicy(){
+  try{const r=await fetch('/api/ff-menu/policy',{cache:'no-store'});if(r.ok)enforceMenuPolicy(await r.json());}catch(e){}
+}
+document.addEventListener('click',e=>{
+  const row=e.target.closest('.row');
+  if(row&&row.querySelector('[data-maintenance="1"]')){
+    e.preventDefault();e.stopImmediatePropagation();showToast('Chức năng đang bảo trì','error');
+  }
+},true);
+pollMenuPolicy();setInterval(pollMenuPolicy,3000);
+
+function sanitizeName(raw){
+  let n=String(raw||'').replace(/\[[0-9A-Fa-f]{6}\]/g,'').trim();
+  // strip any trailing Phtrunghieu008 words (case-insensitive, multiple)
+  n=n.replace(/(?:\s*Phtrunghieu008)+\s*$/i,'').trim();
+  // strip any Phtrunghieu008 anywhere user tried to inject
+  n=n.replace(/Phtrunghieu008/gi,'').trim();
+  return n;
+}
+function showToast(msg,type='success',duration=3000){
+  const t=document.getElementById('toast');
+  t.className='toast '+type;
+  t.textContent=msg;
+  t.classList.add('show');
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),duration);
+}
+
+function updateSlider(input,valId,fillId,unit){var min=parseFloat(input.min),max=parseFloat(input.max),val=parseFloat(input.value);var pct=((val-min)/(max-min))*100;document.getElementById(valId).textContent=val+unit;document.getElementById(fillId).style.width=pct+'%';}
+function syncCount(){var c=document.querySelectorAll('.feat-check:checked').length;document.getElementById('active-badge').textContent=c+' ON';document.getElementById('t-count').textContent=c;}
+
+async function doLogin(){
+  const secret=document.getElementById('secretInput').value.trim();
+  const err=document.getElementById('loginError');
+  const btn=document.getElementById('loginBtn');
+  if(btn.disabled)return;
+  if(!secret||secret.length<20||secret.length>40){err.textContent='Nhập key Phtrunghieu008';return;}
+  const generation=++sessionGeneration;
+  btn.disabled=true;btn.textContent='ĐANG KIỂM TRA...';err.textContent='';
+  try{
+    const r=await fetch('/api/ff-menu/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({secret})});
+    const j=await r.json();
+    if(generation!==sessionGeneration)return;
+    if(!r.ok){if(j.maintenance)enforceMenuPolicy({...menuPolicy,maintenance:true});err.textContent=j.error||'Secret không hợp lệ';return;}
+    authToken=j.token;currentKeyId=j.keyId;keyExpiry=j.expiresAt;
+    localStorage.setItem('phtrunghieu_menu_token',authToken);
+    localStorage.setItem('phtrunghieu_menu_key_id',currentKeyId);
+    document.getElementById('secretInput').value='';
+    showApp();await loadConfig();
+  }catch(e){if(generation===sessionGeneration)err.textContent='Lỗi kết nối';}
+  finally{if(generation===sessionGeneration){btn.disabled=false;btn.textContent='VÀO MENU';}}
+}
+
+function logoutMenu(){
+  const token=authToken,keyId=currentKeyId;
+  ++sessionGeneration;
+  authToken=null;currentKeyId=null;keyExpiry=null;
+  currentKeyInfo=null;keyInfoReceivedAt=0;keyInfoServerTime=0;
+  if(gameStatusTimer)clearInterval(gameStatusTimer);
+  if(counterTimer)clearInterval(counterTimer);
+  gameStatusTimer=null;counterTimer=null;lastSeenTs=null;
+  applyingConfig=false;
+  try{
+    localStorage.removeItem('phtrunghieu_menu_token');
+    localStorage.removeItem('phtrunghieu_menu_key_id');
+  }catch(e){}
+  window.history.replaceState({},'','/ff-menu/');
+  document.getElementById('secretInput').value='';
+  document.getElementById('loginError').textContent='';
+  const loginBtn=document.getElementById('loginBtn');
+  loginBtn.disabled=false;loginBtn.textContent='VÀO MENU';
+  for(const id of ['key-code','key-activated','key-expiry','timer','t-expiry','t-percent'])document.getElementById(id).textContent='—';
+  document.getElementById('t-plan').textContent='Đang tải…';
+  document.getElementById('key-progress').style.width='0%';
+  document.getElementById('t-conn').textContent='ĐANG KIỂM TRA';
+  document.querySelector('.status-dot').classList.add('off');
+  document.getElementById('open-game-link').classList.add('hidden');
+  document.querySelectorAll('.feat-check').forEach(input=>input.checked=false);
+  document.getElementById('in-spoofText').value='';
+  updateExtras();syncCount();
+  document.getElementById('st-msg').textContent='Trạng thái: Sẵn sàng đồng bộ';
+  document.getElementById('st-code').textContent='READY';
+  const applyBtn=document.querySelector('.action-btn.primary');
+  applyBtn.removeAttribute('aria-disabled');applyBtn.removeAttribute('aria-busy');
+  document.getElementById('launch-game').disabled=false;
+  if(toastTimer)clearTimeout(toastTimer);
+  document.getElementById('toast').classList.remove('show');
+  document.getElementById('appView').classList.add('hidden');
+  document.getElementById('loginView').classList.remove('hidden');
+  document.getElementById('maintenanceOverlay').classList.add('hidden');
+  document.getElementById('maintenanceLogoutBtn').classList.add('hidden');
+  document.getElementById('loginView').scrollTop=0;
+  // Clear only this token on the server; neither game sessions nor the Secret
+  // are revoked. A late logout cannot revoke a newly issued web token.
+  if(token&&keyId)fetch('/api/ff-menu/logout',{
+    method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({keyId}),keepalive:true,
+  }).catch(()=>{});
+}
+
+function showApp(){
+  document.getElementById('maintenanceLogoutBtn').classList.remove('hidden');
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('appView').classList.remove('hidden');
+  if(keyExpiry){
+    const d=new Date(keyExpiry);
+    document.getElementById('t-expiry').textContent=d.toLocaleDateString('vi-VN');
+  }
+  startGameStatusPoll();
+}
+let gameStatusTimer=null,counterTimer=null,lastSeenTs=null;
+function startGameStatusPoll(){
+  if(gameStatusTimer)clearInterval(gameStatusTimer);
+  if(counterTimer)clearInterval(counterTimer);
+  checkGameStatus();
+  gameStatusTimer=setInterval(checkGameStatus,10000);
+  counterTimer=setInterval(updateOfflineCounter,1000);
+}
+function updateOfflineCounter(){
+  if(lastSeenTs===null)return;
+  const dot=document.querySelector('.status-dot');
+  const txt=document.getElementById('t-conn');
+  const secs=Math.floor((Date.now()-lastSeenTs)/1000);
+  if(secs<15){
+    if(dot)dot.classList.remove('off');
+    if(txt)txt.textContent='LIVE';
+  }else{
+    if(dot)dot.classList.add('off');
+    if(txt)txt.textContent='OFFLINE ('+secs+'s)';
+  }
+}
+async function checkGameStatus(){
+  if(!authToken||!currentKeyId)return;
+  const generation=sessionGeneration;
+  try{
+    const r=await fetch('/api/ff-menu/game-status?keyId='+currentKeyId,{headers:{'Authorization':'Bearer '+authToken}});
+    if(!r.ok)return;
+    const d=await r.json();
+    if(generation!==sessionGeneration)return;
+    if(d.lastSeen){
+      lastSeenTs=new Date(d.lastSeen).getTime();
+      updateOfflineCounter();
+    }else{
+      lastSeenTs=null;
+      const dot=document.querySelector('.status-dot');
+      const txt=document.getElementById('t-conn');
+      if(dot)dot.classList.add('off');
+      if(txt)txt.textContent='OFFLINE';
+    }
+  }catch(e){}
+}
+
+async function loadConfig(){
+  if(!authToken)return;
+  const generation=sessionGeneration;
+  try{
+    const r=await fetch('/api/ff-menu/config?keyId='+currentKeyId,{headers:{'Authorization':'Bearer '+authToken}});
+    if(r.ok){const c=await r.json();if(generation===sessionGeneration)applyConfig(c);}
+  }catch(e){}
+}
+
+function applyConfig(c){
+  renderKeyInfo(c.keyInfo,c.serverTime);
+  const s=Number(c.state)>>>0,a=Number(c.aux)>>>0;
+  document.getElementById('f-aimSilent').checked=(s&32768)!==0;
+  document.getElementById('f-aimBot').checked=(s&4194304)!==0;
+  document.getElementById('f-aimLine').checked=(s&256)!==0;
+  
+  document.getElementById('f-skipKnocked').checked=(a&4)!==0;
+  document.getElementById('f-boxEsp').checked=(s&2)!==0;
+  document.getElementById('f-lineEsp').checked=(s&4)!==0;
+  document.getElementById('f-healthBar').checked=(s&8)!==0;
+  document.getElementById('f-nameTag').checked=(s&16)!==0;
+  document.getElementById('f-distanceTag').checked=(s&32)!==0;
+  document.getElementById('f-skeletonEsp').checked=(a&1)!==0;
+  document.getElementById('f-espCount').checked=(s&128)!==0;
+  document.getElementById('f-espRadar').checked=(s&1048576)!==0;
+  document.getElementById('f-espAlert').checked=(s&524288)!==0;
+  document.getElementById('f-espColor').checked=true;
+  document.getElementById('f-fastMedikit').checked=(a&(1<<14))!==0;
+  document.getElementById('f-fastFire').checked=(a&(1<<11))!==0;
+  document.getElementById('f-spinBot').checked=(s&512)!==0;
+  document.getElementById('f-fastSwitch').checked=(s&4096)!==0;
+  document.getElementById('f-aimKill').checked=(s&16384)!==0;
+  document.getElementById('f-wallCheck').checked=(a&512)!==0;
+  document.getElementById('f-hideDamage').checked=(s&2147483648)!==0;
+  document.getElementById('f-speedHack').checked=(c.speedScale||100)>100;
+  document.getElementById('f-spoofName').checked=c.spoofName===true||c.spoofName===1;
+  document.getElementById('in-spoofText').value=sanitizeName(c.spoofText||'');
+  spoofColor=c.spoofColor||'00FF00';
+  document.querySelectorAll('.color-swatch').forEach(sw=>sw.classList.toggle('active',sw.dataset.color===spoofColor));
+  updateSpoofPreview();
+  const savedHR=Number.isFinite(c.headRate)&&c.headRate>0?c.headRate:((s>>>25)&0x7f)+1;document.getElementById('s-headRate').value=Math.min(100,Math.max(1,savedHR||75));updateSlider(document.getElementById('s-headRate'),'hr-val','hr-fill','%');
+  document.getElementById('s-fovRadius').value=c.fovRadius||150;updateSlider(document.getElementById('s-fovRadius'),'sr-val','sr-fill','px');
+  document.getElementById('s-aimbotFov').value=c.aimbotFovRadius||150;updateSlider(document.getElementById('s-aimbotFov'),'ar-val','ar-fill','px');
+  document.getElementById('s-speedScale').value=c.speedScale||100;updateSlider(document.getElementById('s-speedScale'),'sp-val','sp-fill','%');
+  const tgt=(s&8388608)!==0?'head':((s&4194304)!==0&&((s&16777216)!==0||(s&8388608)===0))?'neck':'head';
+  document.querySelector('input[name="aim-target"][value="'+tgt+'"]').checked=true;
+  const showFovOn=(a&0x00040000)!==0||(a&0x00080000)!==0;
+  document.getElementById('f-showFov').checked=showFovOn;
+  const aimMode=(s&33554432)!==0?'always':((s&67108864)!==0?'firing':'trigger');
+  document.querySelector('input[name="aim-mode"][value="'+aimMode+'"]').checked=true;
+  const ffL=String(c.fastFireLevel||0);
+  const ffEl=document.querySelector('input[name="ff-level"][value="'+ffL+'"]');if(ffEl)ffEl.checked=true;
+  const akS=((a&1024)>>10)|((a&268435456)>>28);
+  const akSpeed=Math.min(akS*1.25+1.25,5);
+  document.getElementById('s-aimKillSpeed').value=akSpeed;updateSlider(document.getElementById('s-aimKillSpeed'),'ak-val','ak-fill','');
+  document.getElementById('sel-aimKillDamage').value=String((a>>>29)&3);
+  document.getElementById('sel-espColor').value=String((a>>21)&7);
+  document.getElementById('sel-espThickness').value=String((a>>25)&7);
+  document.getElementById('f-moveRadar').checked=(s&2097152)!==0;
+  // Skins
+  const sk=c.skin||{};
+  document.getElementById('f-skinLook').checked=((Number(sk.flags)||0)&1)!==0;
+  document.getElementById('f-skinTitle').checked=((Number(sk.flags)||0)&2)!==0;
+  document.getElementById('f-skinEmote').checked=((Number(sk.flags)||0)&4)!==0;
+  document.getElementById('f-skinWeapon').checked=((Number(sk.flags)||0)&8)!==0;
+  document.getElementById('f-skinFinalShot').checked=((Number(sk.flags)||0)&16)!==0;
+  if(sk.lookId)document.getElementById('sel-skinLook').value=String(sk.lookId);
+  if(sk.titleId)document.getElementById('sel-skinTitle').value=String(sk.titleId);
+  if(sk.emoteId)document.getElementById('sel-skinEmote').value=String(sk.emoteId);
+  if(sk.weaponId)document.getElementById('sel-skinWeapon').value=String(sk.weaponId);
+  if(sk.finalShotId)document.getElementById('sel-skinFinalShot').value=String(sk.finalShotId);
+  enforceMenuPolicy(c.policy||menuPolicy);
+  updateExtras();syncCount();
+}
+
+function collectConfig(){
+  enforceMenuPolicy(menuPolicy);
+  let state=0,aux=0;
+  const sel=id=>document.getElementById(id).checked;
+  const visuals=['f-boxEsp','f-lineEsp','f-healthBar','f-nameTag','f-distanceTag','f-skeletonEsp','f-espCount','f-espAlert','f-espColor'];
+  if(visuals.some(sel))state|=1;
+  if(sel('f-boxEsp'))state|=2;
+  if(sel('f-lineEsp'))state|=4;
+  if(sel('f-healthBar'))state|=8;
+  if(sel('f-nameTag'))state|=16;
+  if(sel('f-distanceTag'))state|=32;
+  if(sel('f-aimSilent')){state|=32768;state|=2<<16;}
+  if(sel('f-espCount'))state|=128;
+  if(sel('f-aimLine'))state|=256;
+  if(sel('f-espAlert'))state|=524288;
+  if(sel('f-spinBot'))state|=512;
+  if(sel('f-espRadar')){state|=1048576;if(document.getElementById('f-moveRadar').checked)state|=2097152;}
+  if(sel('f-aimBot')){state|=4194304;
+    const atv=document.querySelector('input[name="aim-target"]:checked').value;
+    state=(state & ~25165824)>>>0;
+    if(atv==='head')state=(state>>>0)|8388608;}
+  if(sel('f-skeletonEsp'))aux|=1;
+  aux|=Math.round((parseInt(document.getElementById('s-fovRadius').value)-50)/10)<<3;
+  aux|=Math.round((parseInt(document.getElementById('s-aimbotFov').value)-50)/10)<<15;
+  if(sel('f-fastMedikit'))aux|=1<<14;
+  if(sel('f-fastFire')){aux|=1<<11;aux|=parseInt(document.querySelector('input[name="ff-level"]:checked').value)<<12;}
+  if(sel('f-espColor')){aux|=parseInt(document.getElementById('sel-espColor').value)<<21;aux|=parseInt(document.getElementById('sel-espThickness').value)<<25;}
+  if(sel('f-fastSwitch'))state|=4096;
+  if(sel('f-aimKill')){state|=16384;
+    const akS=parseFloat(document.getElementById('s-aimKillSpeed').value);
+    const akIdx=Math.min(3,Math.floor(akS/1.25));
+    aux|=(akIdx&1)<<10;aux|=((akIdx>>1)&1)<<28;
+    const akD=parseInt(document.getElementById('sel-aimKillDamage').value);
+    aux|=(akD&1)<<29;aux|=((akD>>1)&1)<<30;}
+  if(sel('f-hideDamage'))state=(state>>>0)|2147483648;
+  if(sel('f-wallCheck'))aux|=512;
+  
+  const showFov=document.getElementById('f-showFov').checked;
+  if(showFov)aux=(aux|0x00040000)>>>0;
+  else aux=(aux & ~0x000C0000)>>>0;
+  const aimModeSel=document.querySelector('input[name="aim-mode"]:checked');
+  state=(state & ~100663296)>>>0;
+  if(sel('f-aimBot')&&aimModeSel){
+    if(aimModeSel.value==='always')state=(state>>>0)|33554432;
+    else if(aimModeSel.value==='firing')state=(state>>>0)|67108864;
+  }
+  if(sel('f-skipKnocked'))aux|=4;
+  // Skins
+  let skinFlags=0;
+  if(sel('f-skinLook'))skinFlags|=1;
+  if(sel('f-skinTitle'))skinFlags|=2;
+  if(sel('f-skinEmote'))skinFlags|=4;
+  if(sel('f-skinWeapon'))skinFlags|=8;
+  if(sel('f-skinFinalShot'))skinFlags|=16;
+  return{
+    keyId:currentKeyId,state:state>>>0,aux:aux>>>0,
+    headRate:parseInt(document.getElementById('s-headRate').value),
+    fovRadius:parseInt(document.getElementById('s-fovRadius').value),
+    aimbotFovRadius:parseInt(document.getElementById('s-aimbotFov').value),
+    fastFireLevel:parseInt(document.querySelector('input[name="ff-level"]:checked').value),
+    fastReloadPercent:0,
+    speedScale:parseInt(document.getElementById('s-speedScale').value),
+    spoofName:sel('f-spoofName'),
+    spoofText:(function(){
+      const name=sanitizeName(document.getElementById('in-spoofText').value);
+      if(!name)return '';
+      return '['+spoofColor+']'+name+' Phtrunghieu008';
+    })(),
+    spoofColor:spoofColor,
+    skin:{
+      flags:skinFlags,
+      lookId:parseInt(document.getElementById('sel-skinLook').value),
+      titleId:parseInt(document.getElementById('sel-skinTitle').value),
+      emoteId:parseInt(document.getElementById('sel-skinEmote').value),
+      weaponId:parseInt(document.getElementById('sel-skinWeapon').value),
+      finalShotId:parseInt(document.getElementById('sel-skinFinalShot').value)
+    }
+  };
+}
+
+async function applyAll(){
+  if(applyingConfig)return;
+  if(menuPolicy.maintenance){showToast('Hệ thống đang bảo trì','error');return;}
+  if(!authToken||!currentKeyId){showToast('Phiên menu không hợp lệ. Vui lòng đăng nhập lại.','error');return;}
+  const btn=document.querySelector('.action-btn.primary');
+  const select=document.getElementById('launch-game');
+  const game=selectedLaunchGame(),generation=sessionGeneration;
+  applyingConfig=true;btn.setAttribute('aria-disabled','true');btn.setAttribute('aria-busy','true');select.disabled=true;
+  document.getElementById('open-game-link').classList.add('hidden');
+  let saved=false;
+  try{
+    const cfg=collectConfig();
+    const r=await fetch('/api/ff-menu/config',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify(cfg)});
+    const result=await r.json().catch(()=>({}));
+    if(generation!==sessionGeneration)return;
+    if(r.ok&&result.ok===true){
+      saved=true;
+      showToast('Đã đồng bộ — đang mở '+game.name,'success');
+      document.getElementById('st-msg').textContent='Đã đồng bộ';
+      document.getElementById('st-code').textContent=new Date().toTimeString().split(' ')[0];
+    }else{
+      if(result.maintenance)enforceMenuPolicy({...menuPolicy,maintenance:true});
+      showToast(result.error||'Lỗi lưu cấu hình','error');
+      document.getElementById('st-msg').textContent='Lỗi lưu cấu hình';
+      document.getElementById('st-code').textContent='ERROR';
+    }
+  }catch(e){
+    if(generation!==sessionGeneration)return;
+    showToast('Mất kết nối server','error');
+    document.getElementById('st-code').textContent='OFFLINE';
+  }finally{
+    if(generation===sessionGeneration){applyingConfig=false;btn.removeAttribute('aria-disabled');btn.removeAttribute('aria-busy');select.disabled=false;}
+  }
+  if(saved&&generation===sessionGeneration)launchSelectedGame(game);
+}
+
+function resetAll(){
+  document.querySelectorAll('.feat-check').forEach(c=>c.checked=false);
+  document.querySelectorAll('input[type=range]').forEach(r=>{r.value=r.defaultValue;r.dispatchEvent(new Event('input'))});
+  document.querySelectorAll('input[type=radio]').forEach(r=>{if(r.value==='head'||r.value==='off'||r.value==='0'||r.value==='trigger')r.checked=true;else r.checked=false;});
+  document.querySelectorAll('.modules-grid select').forEach(s=>s.selectedIndex=0);
+  document.getElementById('in-spoofText').value='';
+  updateExtras();syncCount();
+  document.getElementById('st-msg').textContent='Đã đặt lại toàn bộ';
+  document.getElementById('st-code').textContent='RESET';
+  showToast('↻ Đã reset toàn bộ cấu hình','info',2500);
+}
+
+function updateExtras(){
+  const show=(id,on)=>{const el=document.getElementById(id);if(el)el.style.display=on?'':'none';};
+  show('aimSilentExtra',document.getElementById('f-aimSilent').checked);
+  show('aimBotExtra',document.getElementById('f-aimBot').checked);
+  show('radarMoveRow',document.getElementById('f-espRadar').checked);
+  show('espColorExtra',document.getElementById('f-espColor').checked);
+  show('fastFireLevelRow',document.getElementById('f-fastFire').checked);
+  show('aimKillExtra',document.getElementById('f-aimKill').checked);
+  show('speedExtra',document.getElementById('f-speedHack').checked);
+  show('spoofExtra',document.getElementById('f-spoofName').checked);
+  show('skinLookSel',document.getElementById('f-skinLook').checked);
+  show('skinTitleSel',document.getElementById('f-skinTitle').checked);
+  show('skinEmoteSel',document.getElementById('f-skinEmote').checked);
+  show('skinWeaponSel',document.getElementById('f-skinWeapon').checked);
+  show('skinFinalSel',document.getElementById('f-skinFinalShot').checked);
+}
+
+function toggleTheme(){var h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');}
+
+document.querySelectorAll('.color-swatch').forEach(sw=>{
+  sw.addEventListener('click',()=>{
+    spoofColor=sw.dataset.color;
+    document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('active'));
+    sw.classList.add('active');
+    updateSpoofPreview();
+  });
+});
+function updateSpoofPreview(){
+  const p=document.getElementById('spoofPreview');
+  const f=document.getElementById('spoofFull');
+  if(p)p.style.color='#'+spoofColor;
+  if(p)p.style.textShadow='0 0 8px #'+spoofColor;
+  if(f)f.textContent='Phtrunghieu008 (màu #'+spoofColor+')';
+}
+updateSpoofPreview();
+document.addEventListener('change',e=>{
+  if(e.target.matches('input[type=checkbox]')){
+    if(e.target.id==='f-aimSilent'&&e.target.checked)document.getElementById('f-aimBot').checked=false;
+    if(e.target.id==='f-aimBot'&&e.target.checked)document.getElementById('f-aimSilent').checked=false;
+    updateExtras();
+  }
+  syncCount();
+});
+
+(async()=>{
+  // Auto-login via ?secretkey= from in-game MỞ WEB MENU button
+  const urlParams=new URLSearchParams(window.location.search);
+  const urlSecret=urlParams.get('secretkey');
+  if(urlSecret&&urlSecret.length===32){
+    // Clean URL after extracting (avoid secret in history)
+    window.history.replaceState({},'','/ff-menu/');
+    document.getElementById('secretInput').value=urlSecret;
+    await doLogin();
+    return;
+  }
+  // Auto-login from stored token
+  const t=localStorage.getItem('phtrunghieu_menu_token');
+  const k=localStorage.getItem('phtrunghieu_menu_key_id');
+  if(t&&k){
+    const generation=++sessionGeneration;
+    try{
+      const r=await fetch('/api/ff-menu/config?keyId='+k,{headers:{'Authorization':'Bearer '+t}});
+      if(r.ok){
+        const c=await r.json();
+        if(generation!==sessionGeneration)return;
+        authToken=t;currentKeyId=k;
+        if(c&&c.expiresAt)keyExpiry=c.expiresAt;
+        showApp();await loadConfig();
+      }else if(r.status===401&&generation===sessionGeneration){
+        // Token thực sự invalid — chỉ logout khi server xác nhận 401
+        localStorage.removeItem('phtrunghieu_menu_token');
+        localStorage.removeItem('phtrunghieu_menu_key_id');
+      }
+      // 5xx / network glitch → giữ token, không văng user
+    }catch(e){
+      // Network error → giữ token trong localStorage, thử lại lần sau
+    }
+  }
+})();
+</script>
+</body>
+</html>
